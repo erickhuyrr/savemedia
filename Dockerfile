@@ -1,29 +1,23 @@
-# ===============================
-#   SAVEMEDIA Render Deployment
-# ===============================
-
-# Use official Node.js base image
 FROM node:18
 
-# Install system dependencies: ffmpeg, python3, yt-dlp
 RUN apt-get update && \
     apt-get install -y ffmpeg python3 python3-pip yt-dlp && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create app directory
 WORKDIR /app
 
-# Copy package files first (better caching)
+# Copy package.json only first
 COPY package*.json ./
 
-# Install node dependencies
+# Install dependencies
 RUN npm install
 
-# Copy rest of the project
+# Copy all files
 COPY . .
 
-# Expose port (change if your app uses different port)
+# Build TypeScript → create dist/index.cjs
+RUN npm run build
+
 EXPOSE 3000
 
-# Start the server
 CMD ["npm", "start"]
